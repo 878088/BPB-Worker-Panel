@@ -1,12 +1,7 @@
 name: Build and Deploy Worker
 
 on:
-  push:
-    branches:
-      - dev
-
-permissions:
-  contents: write
+  workflow_dispatch:
 
 jobs:
   build:
