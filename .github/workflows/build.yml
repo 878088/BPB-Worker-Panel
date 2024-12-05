@@ -22,8 +22,7 @@ jobs:
       - name: Build project
         run: |
           npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date 2024-10-26 --dry-run --outdir=dist
-          npx javascript-obfuscator dist/worker.js --output _worker.js --compact true --string-array true --string-array-encoding false --string-array-index-shuffle true --rotate-string-array true
-
+          npx javascript-obfuscator dist/worker.js --compact true --string-array true --string-array-encoding false --string-array-encoding rc4,base64
       - name: Commit and push built worker
         run: |
           git config --global user.name "github-actions[bot]"
