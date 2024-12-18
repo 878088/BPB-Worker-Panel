@@ -1,12 +1,7 @@
 name: Build and Deploy Worker
 
 on:
-  push:
-    branches:
-      - dev
-
-permissions:
-  contents: write
+  workflow_dispatch:
 
 jobs:
   build:
@@ -26,15 +21,21 @@ jobs:
 
       - name: Build project
         run: |
-          npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date 2024-10-26 --dry-run --outdir=dist
-          npx javascript-obfuscator --split-strings true --split-strings-chunk-length 2 dist/worker.js --output _worker.js
+          npx wrangler deploy src/worker.js --name bpb --compatibility-flag [nodejs_compat] --compatibility-date $(date +%Y-%m-%d) --dry-run --outdir=dist
+        #npx javascript-obfuscator dist/worker.js --output _worker.js --compact true --string-array true --string-array-encoding false --string-array-encoding rc4,base64 --self-defending true --rename-globals true --transform-object-keys true
 
-      - name: Commit and push built worker
+      - name: Prepare for Release
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add _worker.js
-          git commit -m "Automated build: update _worker.js"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          mkdir -p release
+          cp dist/*.js release/
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: release/*
+          token: ${{ secrets.TOKEN }}
+          tag: v1.0.0
+          releaseName: "Release v1.0.0"
+          body: "This release contains the built and obfuscated worker.js."
+          draft: false
+          prerelease: false
